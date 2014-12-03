@@ -1,23 +1,9 @@
 import config
 
 import os
-import re
 import string
+import random
 import matplotlib.pyplot as plt
-
-def cal_pmf(data, condition=None):
-    pmf = {}
-    data_year = []
-    for i in data:
-        for word in bags(i['summary']):
-            if condition == None or word == condition:
-                data_year.append(i['year'])
-                if (i['year'] in pmf):
-                    pmf[i['year']] += 1
-                else:
-                    pmf[i['year']] = 1
-
-    return pmf, data_year
 
 def histogram(x, y, xlabel, ylabel, title):
     fig = plt.figure()
@@ -27,20 +13,32 @@ def histogram(x, y, xlabel, ylabel, title):
     plt.xlabel(xlabel)
     fig.savefig(os.path.join(config.baseDir, 'Figures/'+title+'.png'))
 
-def sample_data(data, bin_size, range=None):
+def line(x, y, xlabel, ylabel, title):
+    fig = plt.figure()
+    plt.plot(x,y)
+    plt.title(title)
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    fig.savefig(os.path.join(config.baseDir, 'Figures/'+title+'.png'))
+
+def spectrom(X, xlabel, ylabel, title):
+    fig = plt.figure()
+    cax = plt.matshow(X, fignum=False)
+    plt.title(title)
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.colorbar(cax, orientation='horizontal')
+    fig.savefig(os.path.join(config.baseDir, 'Figures/'+title+'.png'))
+
+def sample_data(data, bin_size):
+    cated_data = {1930:[],1940:[],1950:[],1960:[],1970:[],1980:[],1990:[],2000:[],2010:[]}
     sampled_data = []
-    counter = {}
     for d in data:
-        if (d['year'] < range[0] or d['year'] > range[1]):
-            continue
-        if d['year'] in counter:
-            counter[d['year']] += 1
-            if counter[d['year']] <= bin_size:
-                sampled_data.append(d)
-        else:
-            counter[d['year']] = 1
-            if counter[d['year']] <= bin_size:
-                sampled_data.append(d)
+        cated_data[d['year']].append(d)
+
+    for year in cated_data:
+        sampled_data += random.sample(cated_data[year], bin_size)
+
     return sampled_data
 
 def bags(data):
