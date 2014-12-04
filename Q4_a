@@ -1,0 +1,61 @@
+import parse_movies_example as pm
+import numpy as np
+import random
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+
+path='C:\Users\ZHOU Yanfeng\Desktop\hw3\programming\\'
+
+def main():    
+    #randomly sample 6000 movies for each dacade
+    all_movies = list(pm.load_all_movies(path+"plot.list.gz"))
+    x = [row for row in all_movies if row['year']==1930]  
+    sample_movies = random.sample(x,6000)
+    x = [row for row in all_movies if row['year']==1940]  
+    sample_movies.extend(random.sample(x,6000))
+    x = [row for row in all_movies if row['year']==1950]  
+    sample_movies.extend(random.sample(x,6000))
+    x = [row for row in all_movies if row['year']==1960]  
+    sample_movies.extend(random.sample(x,6000))
+    x = [row for row in all_movies if row['year']==1970]  
+    sample_movies.extend(random.sample(x,6000))
+    x = [row for row in all_movies if row['year']==1980]  
+    sample_movies.extend(random.sample(x,6000))
+    x = [row for row in all_movies if row['year']==1990]  
+    sample_movies.extend(random.sample(x,6000))
+    x = [row for row in all_movies if row['year']==2000]  
+    sample_movies.extend(random.sample(x,6000))
+
+    #extract summary and year from even movies as trainint data
+    summarylist = []
+    yearlist = []
+    for movie in sample_movies[0::2]:#train on even movies
+        summary = unicode(movie['summary'], errors='replace')
+        summarylist.append(summary)
+        yearlist.append(movie['year'])
+        
+    #extract summary and year from odd movies as test data
+    summarylist2 = []
+    yearlist2 = []
+    for movie in sample_movies[1::2]:#test on odd movies
+        summary = unicode(movie['summary'], errors='replace')
+        summarylist2.append(summary)
+        yearlist2.append(movie['year'])
+        
+    vec = CountVectorizer()
+    XTrain = vec.fit_transform(summarylist)
+    yTrain = yearlist
+        
+    #training
+    clf = MultinomialNB()
+    clf.fit(XTrain, yTrain)
+    
+    #testing
+    XTest = vec.transform(summarylist2)
+    yTest = yearlist2
+    predicted = clf.predict(XTest)
+    print np.mean(predicted == yTest)
+    
+    
+if __name__ == '__main__':
+    main()
